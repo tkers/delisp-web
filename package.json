@@ -1,0 +1,10 @@
+{
+  "name": "@delisp/web",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "Tijn Kersjes <tijn@divbyzero.nl>",
+  "dependencies": {
+    "@delisp/core": "^0.1.1"
+  }
+}
