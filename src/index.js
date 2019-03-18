@@ -99,19 +99,32 @@ const doCompile = debounce(() => {
   }
 }, 100);
 
-function handleChange() {
+const doUpdateQuery = debounce(() => {
+  const code = editor.value;
+  const params = new URLSearchParams(window.location.search);
+  params.set("code", btoa(code));
+  const query = window.location.pathname + "?" + params.toString();
+  history.pushState(null, "", query);
+}, 100);
+
+function doFormat() {
+  editor.value = formatSource(editor.value);
+}
+
+function updateEditorView() {
   viewer.innerHTML = highlight(editor.value);
   autoGrow();
 }
 
 function handleBlur() {
-  editor.value = formatSource(editor.value);
-  handleChange();
+  doFormat();
+  updateEditorView();
 }
 
 function handleInput() {
-  handleChange();
+  updateEditorView();
   doCompile();
+  doUpdateQuery();
 }
 
 window.addEventListener("load", () => {
@@ -122,6 +135,16 @@ window.addEventListener("load", () => {
   editor.addEventListener("blur", handleBlur);
   editor.addEventListener("input", handleInput);
 
-  handleBlur();
-  handleInput();
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const bcode = params.get("code");
+    const code = bcode && atob(bcode);
+    if (code) {
+      editor.textContent = code;
+    }
+  } catch {}
+
+  doFormat();
+  updateEditorView();
+  doCompile();
 });
