@@ -8,14 +8,18 @@
   </head>
   <body>
     <pre class="comment dl">Delisp input:</pre>
-    <textarea id="editor">
+    <pre class="editor">
+      <code id="code-view"></code>
+      <textarea id="code-input">
 (print "Hello World")
 
 (define sum (lambda (xs) (fold + xs 0)))
+
 (define total (sum [1 2 3 4 5]))
 
 (define create-user (lambda (name age) {:name (the string name) :age (the number age)}))</textarea
-    >
+      >
+    </pre>
     <pre id="statusbar"></pre>
     <pre class="comment js">JavaScript output:</pre>
     <pre id="jscode"></pre>

@@ -1,6 +1,27 @@
 import { inferSource, compileSource, formatSource, printType } from "./delisp";
 
-let editor, statusbar;
+let editor, viewer, statusbar;
+
+function nl2br(str) {
+  return str && str.replace(/(?:\r\n|\r|\n)/g, "<br>");
+}
+
+const patterns = [
+  [/(".+?")/g, '<span class="lit-string">$1</span>'],
+  [/\b([0-9]+)\b/g, '<span class="lit-number">$1</span>'],
+  [
+    /\b(define\s+?)(.+?\s+?)/g,
+    '<span class="special">$1</span><span class="definition">$2</span>'
+  ],
+  [/\b(lambda|export|the|type)\b/g, '<span class="special">$1</span>'],
+  [/(\s|\(|\{)(:.+?)\b/g, '$1<span class="keyword">$2</span>']
+];
+
+function highlight(str) {
+  return (
+    str && patterns.reduce((marked, pat) => marked.replace(pat[0], pat[1]), str)
+  );
+}
 
 function debounce(fn, delay = 100) {
   let timer;
@@ -10,6 +31,17 @@ function debounce(fn, delay = 100) {
     }
     timer = setTimeout(fn, delay);
   };
+}
+
+function autoGrow() {
+  if (editor.clientHeight < editor.scrollHeight) {
+    editor.style.height = editor.scrollHeight + "px";
+    if (editor.clientHeight < editor.scrollHeight) {
+      editor.style.height =
+        editor.scrollHeight * 2 - editor.clientHeight + "px";
+    }
+  }
+  viewer.style.height = editor.style.height;
 }
 
 function clearStatus() {
@@ -50,14 +82,9 @@ function showLastType(typedModule) {
   }
 }
 
-function doFormat() {
-  editor.value = formatSource(editor.value);
-}
-
-function doRun() {
+const doCompile = debounce(() => {
+  const src = editor.value;
   try {
-    const src = editor.value;
-
     const typedModule = inferSource(src);
     showLastType(typedModule);
 
@@ -70,15 +97,31 @@ function doRun() {
       showError(ex.message);
     }
   }
+}, 100);
+
+function handleChange() {
+  viewer.innerHTML = highlight(editor.value);
+  autoGrow();
+}
+
+function handleBlur() {
+  editor.value = formatSource(editor.value);
+  handleChange();
+}
+
+function handleInput() {
+  handleChange();
+  doCompile();
 }
 
 window.addEventListener("load", () => {
-  editor = document.getElementById("editor");
+  editor = document.getElementById("code-input");
+  viewer = document.getElementById("code-view");
   statusbar = document.getElementById("statusbar");
 
-  editor.addEventListener("blur", doFormat);
-  editor.addEventListener("keydown", debounce(doRun));
+  editor.addEventListener("blur", handleBlur);
+  editor.addEventListener("input", handleInput);
 
-  doFormat();
-  doRun();
+  handleBlur();
+  handleInput();
 });
