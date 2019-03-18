@@ -1,3 +1,5 @@
+import { inferSource, compileSource, formatSource, printType } from "./delisp";
+
 let editor, statusbar;
 
 function debounce(fn, delay = 100) {
@@ -42,24 +44,24 @@ function showLastType(typedModule) {
   }
   const type = sntx.info && sntx.info.type;
   if (type) {
-    showInfo(Delisp.printType(type));
+    showInfo(printType(type));
   } else {
     clearStatus();
   }
 }
 
-function format() {
-  editor.value = Delisp.formatSource(editor.value);
+function doFormat() {
+  editor.value = formatSource(editor.value);
 }
 
-function compile() {
+function doRun() {
   try {
     const src = editor.value;
 
-    const typedModule = Delisp.inferSource(src);
+    const typedModule = inferSource(src);
     showLastType(typedModule);
 
-    const jscode = Delisp.compileSource(src);
+    const jscode = compileSource(src);
     document.getElementById("jscode").textContent = jscode;
   } catch (ex) {
     if (ex.isWarning) {
@@ -74,9 +76,9 @@ window.addEventListener("load", () => {
   editor = document.getElementById("editor");
   statusbar = document.getElementById("statusbar");
 
-  editor.addEventListener("blur", format);
-  editor.addEventListener("keydown", debounce(compile));
+  editor.addEventListener("blur", doFormat);
+  editor.addEventListener("keydown", debounce(doRun));
 
-  format();
-  compile();
+  doFormat();
+  doRun();
 });

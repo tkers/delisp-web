@@ -5,11 +5,10 @@ import builtins from "rollup-plugin-node-builtins";
 import minify from "rollup-plugin-babel-minify";
 
 export default {
-  input: "src/delisp.js",
+  input: "src/index.js",
   output: {
-    file: "dist/delisp.js",
-    format: "iife",
-    name: "Delisp"
+    file: "dist/app.js",
+    format: "iife"
   },
   plugins: [
     nodeResolve({ preferBuiltins: false }),
