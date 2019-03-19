@@ -30,7 +30,7 @@ export const inferSource = src => {
 
 export const compileSource = src => {
   const syntax = readModule(src);
-  return compileModuleToString(syntax);
+  return compileModuleToString(syntax, "", true);
 };
 
 export const formatSource = (src, w = 40) => {
