@@ -2,10 +2,15 @@ import {
   readModule,
   inferModule,
   compileModuleToString,
+  findSyntaxByRange,
   pprintModule,
   printType,
-  printHighlightedExpr
-} from "@delisp/core";
+  printHighlightedExpr,
+  isExpression,
+  isTypeAlias,
+  isDefinition,
+  isExport
+} from "../../delisp/packages/delisp-core";
 
 export { printType };
 
@@ -35,4 +40,20 @@ export const compileSource = src => {
 
 export const formatSource = (src, w = 40) => {
   return pprintModule(readModule(src), w);
+};
+
+export const findTypeAtRange = (typedModule, cursorStart, cursorEnd) => {
+  const s = findSyntaxByRange(typedModule, cursorStart, cursorEnd);
+  if (!s) {
+    return;
+  }
+  if (isExpression(s)) {
+    return s.info.type;
+  } else if (isTypeAlias(s)) {
+    return s;
+  } else if (isDefinition(s)) {
+    return s.value.info.type;
+  } else if (isExport(s)) {
+    return s.value.info.type;
+  }
 };

@@ -1,6 +1,13 @@
-import { inferSource, compileSource, formatSource, printType } from "./delisp";
+import {
+  inferSource,
+  findTypeAtRange,
+  compileSource,
+  formatSource,
+  printType
+} from "./delisp";
 
 let editor, viewer, statusbar;
+let typedModule, cursorStart, cursorEnd;
 
 function nl2br(str) {
   return str && str.replace(/(?:\r\n|\r|\n)/g, "<br>");
@@ -64,33 +71,38 @@ function showInfo(msg) {
   statusbar.textContent = msg;
 }
 
-function showLastType(typedModule) {
-  if (typedModule.body.length === 0) {
-    clearStatus();
-    return;
-  }
+function showCursorType() {
+  if (!typedModule) return;
 
-  let sntx = typedModule.body[typedModule.body.length - 1];
-  if (sntx.type === "definition") {
-    sntx = sntx.value;
-  }
-  const type = sntx.info && sntx.info.type;
-  if (type) {
-    showInfo(printType(type));
-  } else {
-    clearStatus();
+  const pos = getCursorPos(editor);
+  if (pos.start === cursorStart && pos.end === cursorEnd) return;
+  cursorStart = pos.start;
+  cursorEnd = pos.end;
+
+  try {
+    const type = findTypeAtRange(typedModule, cursorStart, cursorEnd);
+    if (type) {
+      showInfo(printType(type));
+    } else {
+      clearStatus();
+    }
+  } catch (ex) {
+    if (ex.isWarning) {
+      showWarn(ex.message);
+    } else {
+      showError(ex.message);
+    }
   }
 }
 
 const doCompile = debounce(() => {
   const src = editor.value;
   try {
-    const typedModule = inferSource(src);
-    showLastType(typedModule);
-
+    typedModule = inferSource(src);
     const jscode = compileSource(src);
     document.getElementById("jscode").textContent = jscode;
   } catch (ex) {
+    typedModule = null;
     if (ex.isWarning) {
       showWarn(ex.message);
     } else {
@@ -127,6 +139,39 @@ function handleInput() {
   doUpdateQuery();
 }
 
+function getCursorPos(input) {
+  if ("selectionStart" in input && document.activeElement == input) {
+    return {
+      start: input.selectionStart,
+      end: input.selectionEnd
+    };
+  } else if (input.createTextRange) {
+    var sel = document.selection.createRange();
+    if (sel.parentElement() === input) {
+      var rng = input.createTextRange();
+      rng.moveToBookmark(sel.getBookmark());
+      for (
+        var len = 0;
+        rng.compareEndPoints("EndToStart", rng) > 0;
+        rng.moveEnd("character", -1)
+      ) {
+        len++;
+      }
+      rng.setEndPoint("StartToStart", input.createTextRange());
+      for (
+        var pos = { start: 0, end: len };
+        rng.compareEndPoints("EndToStart", rng) > 0;
+        rng.moveEnd("character", -1)
+      ) {
+        pos.start++;
+        pos.end++;
+      }
+      return pos;
+    }
+  }
+  return -1;
+}
+
 window.addEventListener("load", () => {
   editor = document.getElementById("code-input");
   viewer = document.getElementById("code-view");
@@ -147,4 +192,8 @@ window.addEventListener("load", () => {
   doFormat();
   updateEditorView();
   doCompile();
+
+  setInterval(() => {
+    showCursorType();
+  }, 100);
 });
