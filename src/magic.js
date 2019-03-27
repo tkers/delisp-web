@@ -1,3 +1,4 @@
+import snazzy from "./snazzy";
 import {
   readModule,
   inferModule,
@@ -24,41 +25,29 @@ const inferSource = (src, globals = []) => {
   return typedModule;
 };
 
+// remove the require("@delisp/runtime")
 const removeFirstLine = str =>
   str
     .split("\n")
     .slice(1)
     .join("\n");
 
-const transpile = (src, globals) => {
+// get the list of global identifiers from the script attribute
+const getGlobals = elem => {
+  const globals = elem.getAttribute("data-globals");
+  return globals ? globals.split(",").map(x => x.trim()) : [];
+};
+
+// transforms the given source to JS
+const transformDelisp = (src, elem) => {
+  const globals = getGlobals(elem);
   const inferredModule = inferSource(src, globals);
-  const jsCode = compileModuleToString(inferredModule);
-  return removeFirstLine(jsCode);
+  const js = compileModuleToString(inferredModule);
+  return removeFirstLine(js);
 };
 
-const createJs = (code, attributes = []) => {
-  const node = document.createElement("script");
-  for (const attr of attributes) {
-    node.setAttribute(attr.name, attr.value);
-  }
-  node.type = "text/javascript";
-  node.innerHTML = code;
-  return node;
+const init = () => {
+  snazzy("text/delisp", transformDelisp);
 };
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-    const scripts = document.querySelectorAll("script[type='text/delisp']");
-    scripts.forEach(dlElem => {
-      const options = dlElem.dataset;
-      const globals =
-        options.globals && options.globals.split(",").map(x => x.trim());
-      const jsCode = transpile(dlElem.innerHTML, globals);
-      if (!jsCode) return;
-      const jsElem = createJs(jsCode, dlElem.attributes);
-      dlElem.parentElement.replaceChild(jsElem, dlElem);
-    });
-  },
-  false
-);
+document.addEventListener("DOMContentLoaded", init, false);
