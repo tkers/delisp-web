@@ -45,3 +45,7 @@ pre {
   overflow-x: scroll;
   -webkit-overflow-scrolling: touch;
 }
+
+code > strong {
+  color: #00ff90;
+}

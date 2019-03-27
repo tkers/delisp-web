@@ -16,6 +16,8 @@
         (alert
           (factorial
             (parseInt (prompt "Calculate factorial of:") 10)))))
+
+      (print "Factorial demo loaded")
     </script>
   </head>
 
@@ -25,7 +27,7 @@
       <h3>A delightful &lt;script&gt; type for the browser</h3>
 
       <p>Include some magic in your page <code>&lt;head&gt;</code> first:</p>
-      <pre><code>&lt;script src="https://try.delisp.org/magic.js"&gt;&lt;/script&gt;</code></pre>
+      <pre><code>&lt;script src="<strong>https://try.delisp.org/magic.js</strong>"&gt;&lt;/script&gt;</code></pre>
 
       <p>
         Write Delisp anywhere on the page between
@@ -42,14 +44,13 @@
 
       <p>
         <strong>Optional:</strong> Use the <code>data-globals</code> attribute
-        to specify global variables you want to reference (seperated by comma):
+        to specify global variables you want to reference (separated by comma):
       </p>
       <pre><code>&lt;script type="text/delisp" data-globals="prompt, parseInt, alert"&gt;
   (alert
     (factorial
       (parseInt (prompt "Calculate factorial of:") 10)))
 &lt;/script&gt;</code></pre>
-
       <p>
         ➜
         <a href="#" onclick="demo(); return false;"><strong>Profit!</strong></a>
