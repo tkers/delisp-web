@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Delisp magic</title>
+    <link rel="stylesheet" href="magic.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://try.delisp.org/magic.js"></script>
+    <script type="text/delisp" data-globals="prompt, parseInt, alert">
+      (define factorial
+        (lambda (num)
+          (if (zero? num)
+            1
+            (* num (factorial (- num 1))))))
+
+      (define demo (lambda ()
+        (alert
+          (factorial
+            (parseInt (prompt "Calculate factorial of:") 10)))))
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <h1>🌈 text/delisp</h1>
+      <h3>A delightful &lt;script&gt; type for the browser</h3>
+
+      <p>Include some magic in your page <code>&lt;head&gt;</code> first:</p>
+      <pre><code>&lt;script src="https://try.delisp.org/magic.js"&gt;&lt;/script&gt;</code></pre>
+
+      <p>
+        Write Delisp anywhere on the page between
+        <code>&lt;script&gt;</code> tags:<br />
+      </p>
+      <pre><code>&lt;script type="text/delisp"&gt;
+  (define factorial
+    (lambda (num)
+      (if (zero? num)
+        1
+        (* num (factorial (- num 1))))))
+&lt;/script&gt;
+</code></pre>
+
+      <p>
+        <strong>Optional:</strong> Use the <code>data-globals</code> attribute
+        to specify global variables you want to reference (seperated by comma):
+      </p>
+      <pre><code>&lt;script type="text/delisp" data-globals="prompt, parseInt, alert"&gt;
+  (alert
+    (factorial
+      (parseInt (prompt "Calculate factorial of:") 10)))
+&lt;/script&gt;</code></pre>
+
+      <p>
+        ➜
+        <a href="#" onclick="demo(); return false;"><strong>Profit!</strong></a>
+      </p>
+    </main>
+  </body>
+</html>
